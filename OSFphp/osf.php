@@ -604,7 +604,8 @@ function osf_metacast_textgen($subitem, $tagtext, $text) {
     }
     $url = parse_url($subitem['urls'][0]);
     $url = explode('.', $url['host']);
-    $tagtext .= ' osf_' . preg_filter('/[^a-zA-Z0-9]/', '', $url[count($url) - 2]) . $url[count($url) - 1];
+    $count = count($url);
+    $tagtext .= ' osf_' . $url[$count-2] . $url[$count-1];
     $subtext .= '<a target="_blank" title="' . $title . '" href="' . $subitem['urls'][0] . '"';
     if (strstr($subitem['urls'][0], 'wikipedia.org/wiki/')) {
       $subtext .= ' class="osf_wiki ' . $tagtext . '"';
