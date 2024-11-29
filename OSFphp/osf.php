@@ -1176,4 +1176,15 @@ function md_paragraph($line) {
   return sprintf("\n<p>%s</p>\n", $trimmed);
 }
 
+// Add initialization of global variables
+global $osf_starttime;
+if (!isset($osf_starttime)) {
+    $osf_starttime = 0;
+}
+
+global $shownotes_options;
+if (!isset($shownotes_options)) {
+    $shownotes_options = array();
+}
+
 ?>
