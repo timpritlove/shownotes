@@ -5,7 +5,7 @@ function osf_specialtags($needles, $haystack) {
   $return = false;
   if (is_array($needles)) {
     foreach ($needles as $needle) {
-      if (@array_search($needle, $haystack) !== false) {
+      if (is_array($haystack) && array_search($needle, $haystack) !== false) {
         $return = true;
       }
     }
@@ -455,7 +455,7 @@ function osf_item_textgen($subitem, $tagtext, $text, $template = 'block style') 
   global $shownotes_options;
 
   // Default values for options
-  $delimiter = isset($shownotes_options['main_delimiter']) ? $shownotes_options['main_delimiter'] : ' &nbsp;';
+  $delimiter = $shownotes_options['main_delimiter'] ?? ' &nbsp;';
   if ($template === 'list style') {
       $delimiter = '';
   }
@@ -532,7 +532,7 @@ function osf_feed_textgen($subitem, $tagtext, $text) {
   global $shownotes_options;
 
   // Sicherstellen, dass ein gültiger Delimiter gesetzt ist
-  $delimiter = isset($shownotes_options['main_delimiter']) ? $shownotes_options['main_delimiter'] : ' &nbsp;';
+  $delimiter = $shownotes_options['main_delimiter'] ?? ' &nbsp;';
   if (trim($text) == "") {
       return '';
   }
@@ -647,16 +647,8 @@ function osf_metacast_textgen($subitem, $tagtext, $text) {
 //HTML export im anyca.st style
 function osf_export_block($array, $full = false, $template, $filtertags = array(0 => 'spoiler')) {
   global $shownotes_options;
-  if (isset($shownotes_options['main_delimiter'])) {
-    $delimiter = $shownotes_options['main_delimiter'];
-  } else {
-    $delimiter = ' &nbsp;';
-  }
-  if (isset($shownotes_options['main_last_delimiter'])) {
-    $lastdelimiter = $shownotes_options['main_last_delimiter'];
-  } else {
-    $lastdelimiter = '. ';
-  }
+  $delimiter = $shownotes_options['main_delimiter'] ?? ' &nbsp;';
+  $lastdelimiter = $shownotes_options['main_last_delimiter'] ?? '. ';
   $usnid     = get_the_ID() . '_' . str_replace(' ', '', $template);
   $returnstring  = '<div id="osf_usnid_' . $usnid . '">';
   $filterpattern = array(
@@ -667,7 +659,7 @@ function osf_export_block($array, $full = false, $template, $filtertags = array(
   );
   $arraykeys   = array_keys($array);
   for ($i = 0; $i <= count($array); $i++) {
-    if (isset($array[$arraykeys[0]])) {
+    if (is_array($array) && isset($array[$arraykeys[0]])) {
       if (isset($arraykeys[$i])) {
         if (isset($array[$arraykeys[$i]])) {
           if (!isset($array[$arraykeys[$i]]['time'])) {
@@ -703,7 +695,8 @@ function osf_export_block($array, $full = false, $template, $filtertags = array(
               if ($array[$arraykeys[$i]]['chapter']) {
                 $returnstring .= ' class="osf_chapter"';
               }
-              $returnstring .= '>' . $text . '</h'.($array[$arraykeys[$i]]['rank']+2).'> <span class="osf_chaptertime" data-time="' . osf_convert_time($time) . '">' . $time . '</span><p class="osf_items"> ' . "\n";
+              $returnstring .= '>' . $text . '</h'.($array[$arraykeys[$i]]['rank']+2).'> <span class="osf_chaptertime" data-time="' . osf_convert_time($time) . '">' . $time . '</span><p class="osf_items"> 
+</p></div>';
             }
 
             if (isset($array[$arraykeys[$i]]['subitems'])) {
