@@ -453,87 +453,81 @@ function osf_checktags($needles, $haystack) {
 
 function osf_item_textgen($subitem, $tagtext, $text, $template = 'block style') {
   global $shownotes_options;
-  if (isset($shownotes_options['main_delimiter'])) {
-    $delimiter = $shownotes_options['main_delimiter'];
-  } else {
-    $delimiter = ' &nbsp;';
-  }
-  if (trim($text) == "") {
-    return '';
-  }
-  if ($template == 'list style') {
-    $delimiter = '';
+
+  // Default values for options
+  $delimiter = isset($shownotes_options['main_delimiter']) ? $shownotes_options['main_delimiter'] : ' &nbsp;';
+  if ($template === 'list style') {
+      $delimiter = '';
   }
 
+  if (trim($text) === "") {
+      return ''; // Return early if the text is empty
+  }
+
+  // Build the title with time and text
   $title = '';
-  if (isset($subitem['time'])) {
-    $time = trim($subitem['time']);
-    if ($time !== "") {
-      $title .= $subitem['time'] . ': ';
-    }
+  if (!empty($subitem['time'])) {
+      $title .= htmlspecialchars(trim($subitem['time']), ENT_QUOTES, 'UTF-8') . ': ';
   }
-  $title .= $text;
-  if (isset($subitem['tags'])) {
-    $title .= ' (' . implode(' ', $subitem['tags']) . ')';
-    $tagtext .= ' osf_' . implode(' osf_', $subitem['tags']);
+  $title .= htmlspecialchars(trim($text), ENT_QUOTES, 'UTF-8');
+
+  // Add tags to title and tagtext if they exist
+  if (!empty($subitem['tags']) && is_array($subitem['tags'])) {
+      $title .= ' (' . implode(' ', $subitem['tags']) . ')';
+      $tagtext .= ' osf_' . implode(' osf_', $subitem['tags']);
   }
 
+  // Handle tag decoration based on options
+  if (isset($shownotes_options['main_tagdecoration'])) {
+      if (empty($subitem['tags'])) {
+          $text = '<small>' . htmlspecialchars(trim($text), ENT_QUOTES, 'UTF-8') . '</small>';
+      } elseif (in_array('topic', $subitem['tags'])) {
+          $text = '<strong>' . htmlspecialchars(trim($text), ENT_QUOTES, 'UTF-8') . '</strong>';
+      } elseif (in_array('quote', $subitem['tags'])) {
+          $text = '<em>' . htmlspecialchars(trim($text), ENT_QUOTES, 'UTF-8') . '</em>';
+      } elseif (count($subitem['tags']) === 0) {
+          $text = '<small>' . htmlspecialchars(trim($text), ENT_QUOTES, 'UTF-8') . '</small>';
+      } else {
+          $text = htmlspecialchars(trim($text), ENT_QUOTES, 'UTF-8');
+      }
+  } else {
+      $text = htmlspecialchars(trim($text), ENT_QUOTES, 'UTF-8');
+  }
+
+  // Process URLs
   $subtext = '';
+  if (!empty($subitem['urls']) && is_array($subitem['urls']) && isset($subitem['urls'][0])) {
+      $url = htmlspecialchars($subitem['urls'][0], ENT_QUOTES, 'UTF-8');
+      $tagtext .= ' osf_url';
+      if (strpos($url, 'https://') !== false) {
+          $tagtext .= ' osf_https';
+      }
 
-  if(isset($shownotes_options['main_tagdecoration'])) {
-    if(!isset($subitem['tags'])) {
-      $text = '<small>'.trim($text).'</small>';
-    } elseif(in_array('topic', $subitem['tags'])) {
-      $text = '<strong>'.trim($text).'</strong>';
-    } elseif (in_array('quote', $subitem['tags'])) {
-      $text = '<em>'.trim($text).'</em>';
-    } elseif (count($subitem['tags']) == 0) {
-      $text = '<small>'.trim($text).'</small>';
-    } else {
-      $text = trim($text);
-    }
+      // Extract domain for additional tagging
+      $url_parts = parse_url($url);
+      if (isset($url_parts['host'])) {
+          $host_parts = explode('.', $url_parts['host']);
+          $domain_tag = 'osf_' . preg_replace('/[^a-zA-Z0-9]/', '', $host_parts[count($host_parts) - 2] ?? '') .
+              ($host_parts[count($host_parts) - 1] ?? '');
+          $tagtext .= ' ' . $domain_tag;
+      }
+
+      // Build the link with appropriate class
+      $subtext .= '<a target="_blank" title="' . $title . '" href="' . $url . '" class="' . $tagtext . '">' . $text . '</a>';
   } else {
-    $text = trim($text);
+      // If no URL, just return the text wrapped in a span
+      $subtext .= '<span title="' . $title . '"';
+      if (!empty($tagtext)) {
+          $subtext .= ' class="' . $tagtext . '"';
+      }
+      $subtext .= '>' . $text . '</span>';
   }
 
-  if (isset($subitem['urls'][0])) {
-    $tagtext .= ' osf_url';
-    if (strpos($subitem['urls'][0], 'https://') !== false) {
-      $tagtext .= ' osf_https';
-    }
-    $url = parse_url($subitem['urls'][0]);
-    $url = explode('.', $url['host']);
-    $tagtext .= ' osf_' . preg_filter('/[^a-zA-Z0-9]/', '', $url[count($url) - 2]) . $url[count($url) - 1];
-    $subtext .= '<a target="_blank" title="' . $title . '" href="' . $subitem['urls'][0] . '"';
-    if (strstr($subitem['urls'][0], 'wikipedia.org/wiki/')) {
-      $subtext .= ' class="osf_wiki ' . $tagtext . '"';
-    } elseif (strstr($subitem['urls'][0], 'www.amazon.')) {
-      $subtext .= ' class="osf_amazon ' . $tagtext . '"';
-    } elseif (strstr($subitem['urls'][0], 'www.youtube.com/') || strstr($subitem['urls'][0], 'www.youtu.be/') || ($subitem['chapter'] == 'video')) {
-      $subtext .= ' class="osf_youtube ' . $tagtext . '"';
-    } elseif (strstr($subitem['urls'][0], 'flattr.com/')) {
-      $subtext .= ' class="osf_flattr ' . $tagtext . '"';
-    } elseif (strstr($subitem['urls'][0], 'twitter.com/')) {
-      $subtext .= ' class="osf_twitter ' . $tagtext . '"';
-    } elseif (strstr($subitem['urls'][0], 'app.net/')) {
-      $subtext .= ' class="osf_appnet ' . $tagtext . '"';
-    } else {
-      $subtext .= ' class="' . $tagtext . '"';
-    }
-
-    $subtext .= '>' . $text . '</a>';
-  } else {
-    $subtext .= '<span title="' . $title . '"';
-    if ($tagtext != '') {
-      $subtext .= ' class="' . $tagtext . '"';
-    }
-    $subtext .= '>' . $text . '</span>';
-  }
+  // Append the delimiter
   $subtext .= $delimiter;
 
   return $subtext;
 }
-
 function osf_feed_textgen($subitem, $tagtext, $text) {
   global $shownotes_options;
 
@@ -985,23 +979,28 @@ function osf_export_osf($array, $full = false, $template = '', $filtertags = arr
 
 function osf_export_chapterlist($array) {
   $returnstring = '';
-  foreach (@$array as $item) {
-    if (isset($item['chapter'])) {
-      if ($item['chapter']) {
-        $filterpattern = array(
-          '((#)(\S*))',
-          '(\<((http(|s)://\S{0,128})>))',
-          '(\s+((http(|s)://\S{0,128})\s))'
-        );
-        $text = preg_replace($filterpattern, '', $item['orig']);
-        if (strpos($item['time'], '.')) {
-          $returnstring .= $item['time'] . ' ' . $text . "\n";
-        } else {
-          $returnstring .= $item['time'] . '.000 ' . $text . "\n";
-        }
-      }
-    }
+
+  // Ensure $array is an array before proceeding
+  if (!is_array($array)) {
+      return $returnstring; // Return an empty string if $array is not an array
   }
+
+  foreach ($array as $item) {
+      if (isset($item['chapter']) && $item['chapter']) {
+          $filterpattern = array(
+              '((#)(\S*))',
+              '(\<((http(|s)://\S{0,128})>))',
+              '(\s+((http(|s)://\S{0,128})\s))'
+          );
+          $text = preg_replace($filterpattern, '', $item['orig']);
+          if (strpos($item['time'], '.')) {
+              $returnstring .= $item['time'] . ' ' . $text . "\n";
+          } else {
+              $returnstring .= $item['time'] . '.000 ' . $text . "\n";
+          }
+      }
+  }
+
   $returnstring = preg_replace('(\s+\n)', "\n", $returnstring);
   return $returnstring;
 }
