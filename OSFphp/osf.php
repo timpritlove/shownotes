@@ -645,7 +645,7 @@ function osf_metacast_textgen($subitem, $tagtext, $text) {
 }
 
 //HTML export im anyca.st style
-function osf_export_block($array, $full = false, $template, $filtertags = array(0 => 'spoiler')) {
+function osf_export_block($array, $template, $full = false, $filtertags = array(0 => 'spoiler')) {
   global $shownotes_options;
   $delimiter = $shownotes_options['main_delimiter'] ?? ' &nbsp;';
   $lastdelimiter = $shownotes_options['main_last_delimiter'] ?? '. ';
@@ -773,7 +773,7 @@ function osf_export_block($array, $full = false, $template, $filtertags = array(
   return $returnstring;
 }
 
-function osf_export_list($array, $full = false, $template, $filtertags = array(0 => 'spoiler')) {
+function osf_export_list($array, $template, $full = false, $filtertags = array(0 => 'spoiler')) {
   global $shownotes_options;
   if (isset($shownotes_options['main_delimiter'])) {
     $delimiter = $shownotes_options['main_delimiter'];

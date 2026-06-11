@@ -77,9 +77,9 @@ function is_feed() {
 }
 
 if (($emode == 'block style') || ($emode == 'button style')) {
-  $export = osf_export_block($shownotesArray['export'], $fullint, $emode);
+  $export = osf_export_block($shownotesArray['export'], $emode, $fullint);
 } elseif ($emode == 'list style') {
-  $export = osf_export_list($shownotesArray['export'], $fullint, $emode);
+  $export = osf_export_list($shownotesArray['export'], $emode, $fullint);
 } elseif ($emode == 'clean osf') {
   $export = osf_export_osf($shownotesArray['export'], $fullint, $emode);
 } elseif ($emode == 'glossary') {

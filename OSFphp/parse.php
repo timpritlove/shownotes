@@ -125,11 +125,11 @@ function parserWrapperAPI($postdata) {
     $data['tradedoubler'] = '16248286';
     $export = '<div class="info">  <div class="thispodcast">  <div class="podcastimg">  <img src="" alt="Logo">  </div> <?php  include "./../episodeselector.php"; insertselector();  ?>  </div>  <div class="episodeinfo">  <table>  <tr>  <td>Podcast</td><td><a href="#"></a></td>  </tr>  <tr>  <td>Episode</td><td><a href="#"></a></td>  </tr>  <tr>  <td>Sendung vom</td><td>'.date("j. M Y").'</td>  </tr>  <tr>  <td>Podcaster</td><td>'.osf_get_persons('podcaster', $shownotesArray['header']).'</td>  </tr>  <tr>  <td>Shownoter</td>  <td>'.osf_get_persons('shownoter', $shownotesArray['header']).'</td>  </tr>  </table>  </div> </div><br/><br/>'."\n\n";
 
-    $export .= osf_export_block($shownotesArray['export'], 2, 'block style');
+    $export .= osf_export_block($shownotesArray['export'], 'block style', 2);
   } elseif (($mode == 'block style') || ($mode == 'button style')) {
-    $export = osf_export_block($shownotesArray['export'], $fullint, $mode);
+    $export = osf_export_block($shownotesArray['export'], $mode, $fullint);
   } elseif ($mode == 'list style') {
-    $export = osf_export_list($shownotesArray['export'], $fullint, $mode);
+    $export = osf_export_list($shownotesArray['export'], $mode, $fullint);
   } elseif ($mode == 'clean osf') {
     $export = osf_export_osf($shownotesArray['export'], $fullint, $mode);
   } elseif ($mode == 'glossary') {

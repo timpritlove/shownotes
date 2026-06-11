@@ -226,13 +226,13 @@ function osf_shownotes_shortcode($atts, $content = '') {
 
     if (($mode == 'block style') || ($mode == 'button style')) {
       if (isset($shownotesArray['export']) && is_array($shownotesArray['export'])) {
-          $export = osf_export_block($shownotesArray['export'], $fullint, $mode);
+          $export = osf_export_block($shownotesArray['export'], $mode, $fullint);
       } else {
           $export = ''; // Fallback für fehlende 'export'-Daten
       }
   } elseif ($mode == 'list style') {
       if (isset($shownotesArray['export']) && is_array($shownotesArray['export'])) {
-          $export = osf_export_list($shownotesArray['export'], $fullint, $mode);
+          $export = osf_export_list($shownotesArray['export'], $mode, $fullint);
       } else {
           $export = ''; // Fallback
       }
