@@ -87,11 +87,11 @@ function osf_time_from_timestamp($utimestamp) {
   if ($sec < 10) {
     $sec = '0' . $sec;
   }
-  $min = $duration / 60 % 60;
+  $min = (int)($duration / 60) % 60;
   if ($min < 10) {
     $min = '0' . $min;
   }
-  $hour = $duration / 3600 % 24;
+  $hour = (int)($duration / 3600) % 24;
   if ($hour < 10) {
     $hour = '0' . $hour;
   }
